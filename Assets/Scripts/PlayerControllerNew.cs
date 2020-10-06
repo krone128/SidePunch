@@ -53,6 +53,11 @@ public class PlayerControllerNew : MonoBehaviour
         CreateTapGesture();
     }
 
+    private void Update()
+    {
+        ProcessKeyboardInput();
+    }
+
     private void FixedUpdate()
     {
         CheckStaggerState();
@@ -62,18 +67,6 @@ public class PlayerControllerNew : MonoBehaviour
     {
          _staggerEndTimestamp = Time.realtimeSinceStartup + StaggeredInterval;
          _isStaggered = true;
-    }
-    
-
-    private void ProcessTapInput()
-    {
-        if(!_isAlive ||
-            _isStaggered) return;
-        
-        var directionX =
-            Mathf.Sign(tapGesture.FocusX - Camera.main.WorldToScreenPoint(transform.position).x);
-
-        AttemptAttack(directionX);
     }
 
     public void AttemptAttack(float direction)
@@ -146,11 +139,22 @@ public class PlayerControllerNew : MonoBehaviour
 
     private void TapGestureCallback(GestureRecognizer gesture)
     {
+        if (!_isAlive ||
+            _isStaggered) return;
+
         if (gesture.State == GestureRecognizerState.Began)
         {
             ProcessTapInput();
             Debug.LogFormat("Tapped at {0}, {1}", gesture.FocusX, gesture.FocusY);
         }
+    }
+
+    private void ProcessTapInput()
+    {
+        var directionX =
+            Mathf.Sign(tapGesture.FocusX - Camera.main.WorldToScreenPoint(transform.position).x);
+
+        AttemptAttack(directionX);
     }
 
     private void CreateTapGesture()
@@ -159,6 +163,21 @@ public class PlayerControllerNew : MonoBehaviour
         tapGesture.SendBeginState = true;
         tapGesture.StateUpdated += TapGestureCallback;
         FingersScript.Instance.AddGesture(tapGesture);
+    }
+
+    private void ProcessKeyboardInput()
+    {
+        if (!_isAlive ||
+            _isStaggered) return;
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            AttemptAttack(-1);
+        }
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            AttemptAttack(1);
+        }
     }
     
  #endregion
